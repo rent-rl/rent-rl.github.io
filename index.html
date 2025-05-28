@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <meta charset="utf-8">
+    <meta property="og:title" content="RENT: Maximizing Confidence Alone Improves Reasoning" />
+    <meta property="og:description" content="Reinforcement Learning via Entropy Minimization" />
+    <meta property="og:url" content="https://rent-paper.github.io/" />
+    <meta property="og:image" content="https://rent-paper.github.io/static/images/preview.jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="628" />
+    <meta name="description"
+        content="RENT is a fully unsupervised RL method that uses the model's entropy as an intrinsic reward to improve reasoning without external supervision." />
+    <meta name="keywords"
+        content="reinforcement learning, unsupervised learning, entropy minimization, reasoning, language models, confidence, mathematics, GSM8K, MATH500" />
+    <meta name="viewport" content="initial-scale=1" />
+    <!-- twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="RENT: Maximizing Confidence Alone Improves Reasoning" />
+    <meta name="twitter:description"
+        content="RENT is a fully unsupervised RL method that uses the model's entropy as an intrinsic reward to improve reasoning without external supervision." />
+    <meta name="twitter:url" content="https://rent-paper.github.io/" />
+    <meta name="twitter:image" content="https://rent-paper.github.io/static/images/preview.jpeg" />
+    <meta name="twitter:site" content="@pathak2206" />
+    <meta name="twitter:image" content="https://rent-paper.github.io/static/images/preview.jpeg" />
+    <meta name="twitter:image:src" content="https://rent-paper.github.io/static/images/preview.jpeg" />
+    <meta name="twitter:image_alt" content="RENT" />
+
+    <title>RENT: Maximizing Confidence Alone Improves Reasoning</title>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-RYWGEJGP6S"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-RYWGEJGP6S');
+    </script>
+
+    <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+
+    <link rel="stylesheet" href="./static/css/bulma.min.css">
+    <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+    <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+    <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+    <link rel="stylesheet" href="./static/css/index.css">
+    <link rel="stylesheet" href="https://use.typekit.net/iag3ven.css">
+
+    <link rel="stylesheet" href="./static/css/prism.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/prism.min.js">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs-bibtex@2.0.1/prism-bibtex.min.js">
+    </script>
+
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script src="https://d3js.org/topojson.v1.min.js"></script>
+    <script defer src="./static/js/fontawesome.all.min.js"></script>
+    <script src="./static/js/bulma-carousel.min.js"></script>
+    <script src="./static/js/bulma-slider.min.js"></script>
+
+    <!-- mathjax -->
+    <script type="text/javascript" id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({
+            tex2jax: {
+                inlineMath: [['$','$'], ['\\(','\\)']],
+                processEscapes: true
+            }
+        });
+    </script>
+
+</head>
+
+<body>
+    <section class="hero">
+        <div class="hero-body">
+            <div class="container is-max-desktop">
+                <div class="columns is-centered">
+                    <div class="column has-text-centered">
+                        <p style="padding: 20px;" />
+                        <h1 class="title is-1 publication-title">
+                            <span id="main-title">
+                                Maximizing Confidence Alone Improves Reasoning
+                            </span>
+                        </h1>
+                        <div class="is-size-5 publication-authors" style="line-height: 2.2; font-weight: 500; white-space: nowrap;">
+                            <span class="author-block">
+                                <a href="https://mihirp1998.github.io/" target="_blank" class="author-name">Mihir Prabhudesai</a><sup>*</sup>
+                            </span>
+                            &nbsp;&nbsp;
+                            <span class="author-block">
+                                <a href="#" target="_blank" class="author-name">Lili Chen</a><sup>*</sup>
+                            </span>
+                            &nbsp;&nbsp;
+                            <span class="author-block">
+                                <a href="#" target="_blank" class="author-name">Alex Ippoliti</a><sup>*</sup>
+                            </span>
+                            &nbsp;&nbsp;
+                            <span class="author-block">
+                                <a href="https://www.cs.cmu.edu/~katef/" target="_blank" class="author-name">Katerina Fragkiadaki</a>
+                            </span>
+                            &nbsp;&nbsp;
+                            <span class="author-block">
+                                <a href="#" target="_blank" class="author-name">Hao Liu</a>
+                            </span>
+                            &nbsp;&nbsp;
+                            <span class="author-block">
+                                <a href="https://www.cs.cmu.edu/~dpathak/" target="_blank" class="author-name">Deepak Pathak</a>
+                            </span>
+                        </div>
+                        <p style="padding: 0.2rem;" />
+                        <div class="is-size-5 publication-authors">
+                            <span class="author-block" style="color: #252525;">Carnegie Mellon University &nbsp;&nbsp;&middot;&nbsp;&nbsp; Google DeepMind</span><br>
+                            <br style="line-height: 2px" />
+                            <span class="author-block" style="font-size: 0.8em; color: #252525; font-style: italic;"><sup>*</sup>Equal contribution</span>
+                        </div>
+
+                        <p style="padding: 10px;" />
+
+                        <div class="buttons is-centered">
+                            <button class="external-link button is-medium is-ghost publication-links is-rounded">
+                                <a href="#" target="_blank"
+                                    style="text-decoration:none;">
+                                    <span class="icon is-small">
+                                        <i class="ai ai-arxiv"></i>
+                                    </span>
+                                    <span>arXiv</span>
+                                </a>
+                            </button>
+                            <button class="external-link button is-medium is-ghost publication-links is-rounded">
+                                <a href="./static/docs/RENT.pdf" target="_blank">
+                                    <span class="icon is-small">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </span>
+                                    <span>pdf</span>
+                                </a>
+                            </button>
+                            <button class="external-link button is-medium is-ghost publication-links is-rounded">
+                                <a href="#" target="_blank">
+                                    <span class="icon is-small">
+                                        <i class="fab fa-github"></i>
+                                    </span>
+                                    <span>code</span>
+                                </a>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- hack to pull the below up vertically -->
+    <span style="display:block; margin-top:-1.75em;"/>
+
+        <!-- Method Overview -->
+    <section class="section" id="method-overview">
+        <div class="container is-max-widescreen">
+            <div class="columns is-centered has-text-centered">
+                <div class="column" style="border-radius: 10px; background-color: rgb(255,255,255)">
+                    <p style="padding: 10px;" />
+                    <div id="method-overview-wrapper">
+                        <img src="./static/images/AIME24.png" alt="RENT method overview."
+                            class="method-overview-full-img  method-overview" draggable="false" />
+                    </div>
+                            <p style="padding: 10px;" />
+                        <div class="method-overview-text has-text-justified">
+                            <p>
+                                <span class="method-name">RENT: Reinforcement Learning via Entropy Minimization</span> is a fully 
+                                unsupervised reinforcement learning method that improves reasoning performance by using the
+                                model's own confidence as a reward. Given an input problem \(\mathbf{x}\), the model generates
+                                a reasoning chain \(\mathbf{y} = \pi(\mathbf{x})\) and receives a reward based on the negative 
+                                entropy of its token predictions: \(R(\mathbf{y}) = -H(\pi(\mathbf{x}))\). This encourages 
+                                the model to produce more confident predictions. We find that minimizing entropy over tokens 
+                                near the end of the reasoning chain correlates most strongly with improved accuracy. RENT 
+                                requires <i>no external reward or ground-truth answers</i> and consistently improves performance 
+                                across diverse reasoning benchmarks including GSM8K, MATH500, AMC, AIME, and GPQA.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!--/ Method Overview -->
+
+    <section class="section">
+        <div class="container is-max-desktop">
+            <!-- Abstract. -->
+            <div class="columns is-centered has-text-centered">
+                <div class="column is-three-quarters">
+                    <h2 class="title is-3">Abstract</h2>
+                    <div class="content has-text-justified">
+                        <p>
+                            Reinforcement learning (RL) has enabled machine learning models to achieve significant advances in 
+                            many fields. Most recently, RL has empowered frontier language models to solve challenging math, 
+                            science, and coding problems. However, central to any RL algorithm is the reward function, and 
+                            reward engineering is a notoriously difficult problem in any domain. In this paper, we propose 
+                            <span class="method-name">RENT: Reinforcement Learning via Entropy Minimization</span> – a fully 
+                            unsupervised RL method that requires no external reward or ground-truth answers, and instead uses 
+                            the model's entropy of its underlying distribution as an intrinsic reward. We find that by 
+                            reinforcing the chains of thought that yield high model confidence on its generated answers 
+                            improves its reasoning ability. In our experiments, we showcase these improvements on an extensive 
+                            suite of commonly-used reasoning benchmarks, including GSM8K, MATH500, AMC, AIME, and GPQA, and 
+                            models of varying sizes from the Qwen and Mistral families. The generality of our unsupervised 
+                            learning method lends itself to applicability in a wide range of domains where external supervision 
+                            is limited or unavailable.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <!--/ Abstract. -->
+        </div>
+    </section>
+
+    <p style="padding: 20px;" />
+
+    <!-- Method Details -->
+    <section>
+        <div class="container is-max-desktop">
+            <div class="columns is-centered has-text-centered">
+                <div class="column is-three-quarters">
+                    <h2 class="title is-3">
+                        Entropy as Reward
+                    </h2>
+                    <div class="content has-text-justified">
+                        <p class="equation-text">
+                            For a given prompt <span class="math">\(\mathbf{x}\)</span>, the model generates a response 
+                            <span class="math">\(\mathbf{y}_{pred} = y_{pred,1}, \ldots, y_{pred,T} = \pi(\mathbf{x})\)</span>, where <span class="math">\(T\)</span> is the 
+                            number of tokens in the response. At each token <span class="math">\(t \in \{1, \ldots, T\}\)</span>, the model outputs 
+                            a probability distribution <span class="math">\(p_t\)</span> over the vocabulary <span class="math">\(\mathcal{V}\)</span>. The entropy of this 
+                            distribution measures the model's uncertainty:
+                        </p>
+                        <p class="equation" style="text-align: center; margin: 20px 0;">
+                            \[H(p_t) = -\sum_{v \in \mathcal{V}} p_t(v) \log p_t(v)\]
+                        </p>
+                        <p class="equation-text">
+                            We use the negative entropy of the predicted token distribution as a reward signal:
+                        </p>
+                        <p class="equation" style="text-align: center; margin: 20px 0;">
+                            \[R(\mathbf{y}_{pred}) = -H(\pi(\mathbf{x})) = \sum_{t=1}^T \sum_{v \in \mathcal{V}} p_t(v) \log p_t(v)\]
+                        </p>
+                        <p class="equation-text">
+                            This reward encourages the model to produce more confident and peaked distributions over the 
+                            vocabulary. We optimize using <strong>Group Relative Policy Optimization (GRPO)</strong>, which 
+                            evaluates the policy relative to a group of baseline policies for improved stability:
+                        </p>
+                        <p class="equation" style="text-align: center; margin: 20px 0;">
+                            \[\mathcal{L}(\pi) = \mathbb{E}_{\mathbf{y}_{pred} \sim \pi(\mathbf{x})}[R(\mathbf{y}_{pred})] - 
+                            \frac{1}{K} \sum_{i=1}^K \mathbb{E}_{\mathbf{y}_{pred} \sim \pi_i(\mathbf{x})}[R(\mathbf{y}_{pred})]\]
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!--/ Method Details -->
+
+    <p style="padding: 20px;" />
+
+
+    <!-- Results -->
+    <section class="section">
+        <div class="container is-max-desktop">
+            <div class="columns is-centered has-text-centered">
+                <div class="column is-three-quarters">
+                    <h2 class="title is-3">Main Results</h2>
+                    <div class="content has-text-justified">
+                        <p>
+                            We evaluate RENT across multiple model families (Mistral and Qwen) and sizes on diverse 
+                            reasoning benchmarks. Our method consistently improves performance across all tested 
+                            configurations without requiring any external supervision or ground-truth answers.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <p style="padding: 10px;" />
+        
+        <div class="container is-max-desktop">
+            <div class="table-container">
+                <table class="table is-bordered is-striped is-narrow is-hoverable is-fullwidth">
+                    <caption style="caption-side: top; padding: 10px 0; font-weight: bold;">
+                        Performance comparison: Base models vs. RENT across reasoning benchmarks
+                    </caption>
+                    <thead>
+                        <tr>
+                            <th class="has-text-centered">Model</th>
+                            <th class="has-text-centered">GSM8K</th>
+                            <th class="has-text-centered">MATH500</th>
+                            <th class="has-text-centered">AMC</th>
+                            <th class="has-text-centered">AIME</th>
+                            <th class="has-text-centered">GPQA</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Mistral-7B Base</td>
+                            <td class="has-text-centered">0.005</td>
+                            <td class="has-text-centered">0.147</td>
+                            <td class="has-text-centered">0.049</td>
+                            <td class="has-text-centered">0.002</td>
+                            <td class="has-text-centered">0.180</td>
+                        </tr>
+                        <tr>
+                            <td>Mistral-7B + RENT</td>
+                            <td class="has-text-centered has-text-weight-bold">0.577</td>
+                            <td class="has-text-centered has-text-weight-bold">0.168</td>
+                            <td class="has-text-centered has-text-weight-bold">0.068</td>
+                            <td class="has-text-centered has-text-weight-bold">0.033</td>
+                            <td class="has-text-centered has-text-weight-bold">0.286</td>
+                        </tr>
+                        <tr><td colspan="6" class="is-hidden"></td></tr>
+                        <tr>
+                            <td>Qwen2.5-1.5B Base</td>
+                            <td class="has-text-centered">0.097</td>
+                            <td class="has-text-centered">0.548</td>
+                            <td class="has-text-centered">0.251</td>
+                            <td class="has-text-centered">0.026</td>
+                            <td class="has-text-centered">0.239</td>
+                        </tr>
+                        <tr>
+                            <td>Qwen2.5-1.5B + RENT</td>
+                            <td class="has-text-centered has-text-weight-bold">0.725</td>
+                            <td class="has-text-centered has-text-weight-bold">0.559</td>
+                            <td class="has-text-centered has-text-weight-bold">0.284</td>
+                            <td class="has-text-centered has-text-weight-bold">0.072</td>
+                            <td class="has-text-centered has-text-weight-bold">0.249</td>
+                        </tr>
+                        <tr><td colspan="6" class="is-hidden"></td></tr>
+                        <tr>
+                            <td>Qwen2.5-Math-1.5B Base</td>
+                            <td class="has-text-centered">0.000</td>
+                            <td class="has-text-centered">0.625</td>
+                            <td class="has-text-centered">0.409</td>
+                            <td class="has-text-centered">0.094</td>
+                            <td class="has-text-centered">0.013</td>
+                        </tr>
+                        <tr>
+                            <td>Qwen2.5-Math-1.5B + RENT</td>
+                            <td class="has-text-centered has-text-weight-bold">0.159</td>
+                            <td class="has-text-centered has-text-weight-bold">0.765</td>
+                            <td class="has-text-centered has-text-weight-bold">0.468</td>
+                            <td class="has-text-centered has-text-weight-bold">0.110</td>
+                            <td class="has-text-centered has-text-weight-bold">0.286</td>
+                        </tr>
+                        <tr><td colspan="6" class="is-hidden"></td></tr>
+                        <tr>
+                            <td>Qwen2.5-7B Base</td>
+                            <td class="has-text-centered">0.780</td>
+                            <td class="has-text-centered">0.762</td>
+                            <td class="has-text-centered">0.423</td>
+                            <td class="has-text-centered">0.110</td>
+                            <td class="has-text-centered">0.342</td>
+                        </tr>
+                        <tr>
+                            <td>Qwen2.5-7B + RENT</td>
+                            <td class="has-text-centered has-text-weight-bold">0.900</td>
+                            <td class="has-text-centered has-text-weight-bold">0.791</td>
+                            <td class="has-text-centered has-text-weight-bold">0.501</td>
+                            <td class="has-text-centered has-text-weight-bold">0.270</td>
+                            <td class="has-text-centered has-text-weight-bold">0.368</td>
+                        </tr>
+                        <tr><td colspan="6" class="is-hidden"></td></tr>
+                        <tr>
+                            <td>Qwen2.5-Math-7B Base</td>
+                            <td class="has-text-centered">0.000</td>
+                            <td class="has-text-centered">0.652</td>
+                            <td class="has-text-centered">0.466</td>
+                            <td class="has-text-centered">0.210</td>
+                            <td class="has-text-centered">0.058</td>
+                        </tr>
+                        <tr>
+                            <td>Qwen2.5-Math-7B + RENT</td>
+                            <td class="has-text-centered has-text-weight-bold">0.645</td>
+                            <td class="has-text-centered has-text-weight-bold">0.827</td>
+                            <td class="has-text-centered has-text-weight-bold">0.605</td>
+                            <td class="has-text-centered has-text-weight-bold">0.280</td>
+                            <td class="has-text-centered has-text-weight-bold">0.345</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+    <!-- Token Analysis -->
+    <section class="section">
+        <div class="container is-max-desktop">
+            <div class="columns is-centered has-text-centered">
+                <div class="column is-three-quarters">
+                    <h2 class="title is-3">Which Tokens Matter Most?</h2>
+                    <div class="content has-text-justified">
+                        <p>
+                            We investigated which response tokens are most important for entropy minimization. Through 
+                            empirical analysis, we find that minimizing entropy over tokens near the end of the reasoning 
+                            chain – especially those corresponding to the final answer – correlates most strongly with 
+                            improved accuracy.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <p style="padding: 10px;" />
+            
+            <div class="container is-max-desktop">
+                <div class="columns is-centered has-text-centered">
+                    <div class="column is-three-fourths">
+                        <figure>
+                            <img src="./static/images/strategy_correlation_bargraph.png" alt="Token correlation analysis" id="token-correlation-image"
+                                draggable="false" />
+                            <figcaption>
+                                Correlation between negative entropy and accuracy for different token selection strategies across GSM8K, MATH500, and AIME benchmarks.
+                            </figcaption>
+                        </figure>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="columns is-centered has-text-centered">
+                <div class="column is-three-quarters">
+                    <div class="content has-text-justified">
+                        <p>
+                            The "last chunk" strategy shows correlation very close to the "all tokens" approach but is 
+                            much higher than the "first chunk" strategy. This suggests that as the model approaches its 
+                            final answer, it increasingly relies on its own confidence to guide reasoning.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Training Progress -->
+    <section class="section">
+        <div class="container is-max-desktop">
+            <div class="columns is-centered has-text-centered">
+                <div class="column is-three-quarters">
+                    <h2 class="title is-3">Training Progress: Confidence and Accuracy</h2>
+                    <div class="content has-text-justified">
+                        <p>
+                            We track both accuracy and confidence throughout RENT training to demonstrate that 
+                            as the model improves its confidence via entropy minimization, the accuracy also 
+                            improves. This validates our core hypothesis that optimizing confidence leads to 
+                            better reasoning performance.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <p style="padding: 10px;" />
+            
+            <div class="container is-max-desktop">
+                <div class="columns is-centered has-text-centered">
+                    <div class="column is-three-fourths">
+                        <figure>
+                            <img src="./static/images/accuracy_confidence.png" alt="Training progress showing accuracy and confidence correlation" id="accuracy-confidence-image"
+                                draggable="false" />
+                            <figcaption>
+                                Training curves showing the correlation between model confidence and accuracy improvements during RENT training on AMC and MATH500 datasets.
+                            </figcaption>
+                        </figure>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Format vs Reasoning -->
+    <!-- <section class="section">
+        <div class="container is-max-desktop">
+            <div class="columns is-centered has-text-centered">
+                <div class="column is-three-quarters">
+                    <h2 class="title is-3">Beyond Format Learning</h2>
+                    <div class="content has-text-justified">
+                        <p>
+                            A natural question is whether RENT merely teaches models to format their answers correctly 
+                            rather than improving reasoning. We compare against a format-only reward that gives binary 
+                            feedback based on correct formatting. RENT consistently outperforms format-only training, 
+                            demonstrating that the model learns genuine reasoning improvements.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="table-container is-max-desktop is-centered">
+                <table style="width:80%">
+                    <caption>
+                        RENT vs. Format-only reward comparison
+                    </caption>
+                    <thead>
+                        <tr>
+                            <th>Model</th>
+                            <th>Method</th>
+                            <th>GSM8K</th>
+                            <th>MATH500</th>
+                            <th>AMC</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td rowspan="2">Qwen2.5-7B</td>
+                            <td>Format only</td>
+                            <td>0.911</td>
+                            <td>0.774</td>
+                            <td>0.458</td>
+                        </tr>
+                        <tr>
+                            <td><strong>RENT</strong></td>
+                            <td><strong>0.900</strong></td>
+                            <td><strong>0.823</strong></td>
+                            <td><strong>0.501</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section> -->
+
+    <!-- Qualitative Examples -->
+    <!-- <section class="section">
+        <div class="container is-max-desktop">
+            <div class="columns is-centered has-text-centered">
+                <div class="column is-three-quarters">
+                    <h2 class="title is-3">Qualitative Examples</h2>
+                    <div class="content has-text-justified">
+                        <p>
+                            Below we show examples of model responses before and after RENT training, demonstrating 
+                            improved reasoning clarity and confidence.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="container is-max-desktop">
+                <div class="columns">
+                    <div class="column">
+                        <div class="box">
+                            <h4 class="title is-5">Example Problem</h4>
+                            <p><strong>Problem:</strong> Jack is mad at his neighbors for blasting Taylor Swift all night, 
+                            so he slashes three of their tires and smashes their front window. If the tires cost $250 each 
+                            and the window costs $700, how much will Jack have to pay for the damages?</p>
+                            
+                            <hr>
+                            
+                            <p><strong>After RENT Training:</strong></p>
+                            <p>Let's break down the problem step by step.</p>
+                            <p><strong>1. Calculate the total cost of the slashed tires:</strong><br>
+                            Cost per tire = $250<br>
+                            Number of tires = 3<br>
+                            Total cost of tires = $250 × 3 = $750</p>
+                            
+                            <p><strong>2. Identify the cost of the smashed window:</strong><br>
+                            Cost of the window = $700</p>
+                            
+                            <p><strong>3. Calculate the total damages:</strong><br>
+                            Total damages = $750 + $700 = $1450</p>
+                            
+                            <p><strong>#### 1450</strong></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section> -->
+
+    <section class="section" id="paper">
+        <div class="container is-mobile">
+            <div class="columns is-centered has-text-centered">
+                <div class="container content">
+                    <h2 class="title is-3">BibTeX</h2>
+                    <div id="bibtex" class="column has-text-justified is-centered">
+                        <pre><code class="language-bibtex">@article{prabhudesai2025rent,
+    title={Maximizing Confidence Alone Improves Reasoning},
+    author={Prabhudesai, Mihir and Chen, Lili and Ippoliti, Alex and Fragkiadaki, Katerina and Liu, Hao and Pathak, Deepak},
+    journal={arXiv preprint arXiv:XXXX.XXXXX},
+    year={2025}
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="content has-text-centered">
+                <a class="icon-link" href="#" target="_blank">
+                    <i class="ai ai-arxiv"></i>
+                </a>
+                &nbsp;
+                <a class="icon-link" href="./static/docs/RENT.pdf" target="_blank">
+                    <i class="fas fa-file-pdf"></i>
+                </a>
+                &nbsp;
+                <a class="icon-link" href="#" target="_blank">
+                    <i class="fab fa-github"></i>
+                </a>
+            </div>
+            <div class="columns is-centered">
+                <div class="content">
+                    <p>
+                        Page source code was adapted from
+                        <a href="https://nerfies.github.io" target="_blank">here</a>
+                        and
+                        <a href="https://diffusion-classifier.github.io" target="_blank">here</a>.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="./static/js/index.js"></script>
+    <script src="./static/js/prism.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs-bibtex@2.0.1/prism-bibtex.js"
+        integrity="sha256-+dK6uqUp/DnP6ef97s8XcoynBnGe5vM5gvBECH0EB3U=" crossorigin="anonymous">
+        </script>
+</body>
+
+</html>
